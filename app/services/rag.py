@@ -8,18 +8,28 @@ import logging
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
+# Logging para terminal e arquivo
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    file_handler = logging.FileHandler("app_logs.txt", mode='w', encoding='utf-8')
+    file_handler.setFormatter(logging.Formatter('[%(levelname)s] %(asctime)s - %(name)s - %(message)s'))
+    logger.addHandler(file_handler)
 
-# Limiar de similaridade cosine real para considerar documento relevante
-SIMILARITY_THRESHOLD = 0.7
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter('[%(levelname)s] %(asctime)s - %(name)s - %(message)s'))
+    logger.addHandler(console_handler)
 
-# Prompt que guiará o LLM
+SIMILARITY_THRESHOLD = 0.7  # Limite mínimo de similaridade real
+
+# Prompt em português para respostas claras, completas e naturais
 PROMPT = PromptTemplate(
     template=(
-        "Use somente o contexto abaixo para responder à pergunta.\n"
-        "Se você não sabe a resposta com base no contexto, apenas diga "
-        "\"Desculpe, não encontrei a informação necessária nos meus documentos.\", "
-        "não tente inventar uma resposta.\n\n"
+        "Responda à pergunta usando apenas o contexto abaixo.\n"
+        "Se não houver informação suficiente no contexto, diga:\n"
+        "\"Desculpe, não encontrei a informação na minha base.\"\n\n"
+        "Reescreva a resposta em **frases completas e claras**, "
+        "usando exatamente as palavras do contexto e mantendo o significado original.\n\n"
         "Contexto: {context}\n\nPergunta: {question}\n\nResposta:"
     ),
     input_variables=["context", "question"]
@@ -27,7 +37,7 @@ PROMPT = PromptTemplate(
 
 def build_chain():
     """
-    Constrói a cadeia RAG e retorna função wrapper.
+    Constrói a cadeia RAG e retorna função wrapper para consultas.
     """
     logger.info("Carregando modelo de embeddings...")
     embeddings = HuggingFaceEmbeddings(
@@ -49,43 +59,53 @@ def build_chain():
     chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
-        retriever=db.as_retriever(search_kwargs={'k': 5}),  # pega mais docs para comparação
+        retriever=db.as_retriever(search_kwargs={'k': 3}),
         chain_type_kwargs={"prompt": PROMPT},
         return_source_documents=True,
     )
 
     def perguntar_ao_rag(pergunta: str):
         """
-        Retorna a resposta do RAG usando filtro de similaridade real.
+        Retorna resposta natural em português usando filtro de similaridade.
         """
+        logger.info("Pergunta recebida: %s", pergunta)
+
         # Busca top-k documentos
-        docs = db.similarity_search(pergunta, k=5)
+        docs = db.similarity_search(pergunta, k=3)
+        logger.info("Documentos retornados pelo FAISS: %d", len(docs))
 
         if not docs:
-            return "Desculpe, não possuo a informação na minha base."
+            logger.info("Nenhum documento encontrado.")
+            return "Desculpe, não encontrei a informação na minha base."
 
         # Calcula embedding da pergunta
-        pergunta_embedding = embeddings.embed_query(pergunta)
-
-        # Calcula embeddings dos documentos
+        pergunta_emb = embeddings.embed_query(pergunta)
         doc_embeddings = np.array([embeddings.embed_query(doc.page_content) for doc in docs])
 
-        # Calcula cosine similarity
-        sims = cosine_similarity([pergunta_embedding], doc_embeddings)[0]
+        # Calcula similaridade coseno
+        sims = cosine_similarity([pergunta_emb], doc_embeddings)[0]
+        logger.info("Similaridades calculadas: %s", sims)
 
         # Seleciona documentos acima do limiar
         relevant_docs = [doc for doc, sim in zip(docs, sims) if sim >= SIMILARITY_THRESHOLD]
+        logger.info("Documentos relevantes após filtro: %d", len(relevant_docs))
 
         if not relevant_docs:
-            return "Desculpe, não possuo a informação na minha base."
+            logger.info("Nenhum documento passou no limiar de similaridade.")
+            return "Desculpe, não encontrei a informação na minha base."
 
-        # Monta o contexto concatenando os docs relevantes
+        # Monta contexto concatenado
         context = "\n\n".join([doc.page_content for doc in relevant_docs])
+        logger.info("Contexto final usado para LLM: %s", context)
 
         # Gera prompt final
         final_prompt = PROMPT.format(context=context, question=pergunta)
+        logger.info("Prompt enviado ao LLM: %s", final_prompt)
 
-        # Chama o LLM
-        return llm.invoke(final_prompt)
+        # Gera resposta
+        resposta = llm.invoke(final_prompt)
+        logger.info("Resposta final: %s", resposta)
+
+        return resposta
 
     return chain, perguntar_ao_rag

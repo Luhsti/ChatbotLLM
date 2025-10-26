@@ -16,11 +16,12 @@ def get_llm():
         task="text2text-generation",
         model=model,
         tokenizer=tokenizer,
-        max_new_tokens=256,
-        temperature=0.1,
-        repetition_penalty=1.3,
-        do_sample=True
+        max_new_tokens=350,
+        temperature=0.9,           # menor criatividade
+        repetition_penalty=1.1,
+        do_sample=True             # desativa sampling, saída mais determinística
     )
+
 
     # Retorna o pipeline encapsulado pelo LangChain
     return HuggingFacePipeline(pipeline=pipe)
