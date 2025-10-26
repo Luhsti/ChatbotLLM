@@ -2,13 +2,18 @@ from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-from app.services import rag_llm  # Importa o módulo que fornece o LLM
+from app.services import rag_llm
 from app.core.config import settings
 import logging
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
-# Define o prompt que guiará o LLM, instruindo-o a usar apenas o contexto
+# Limiar de similaridade cosine real para considerar documento relevante
+SIMILARITY_THRESHOLD = 0.7
+
+# Prompt que guiará o LLM
 PROMPT = PromptTemplate(
     template=(
         "Use somente o contexto abaixo para responder à pergunta.\n"
@@ -22,7 +27,7 @@ PROMPT = PromptTemplate(
 
 def build_chain():
     """
-    Constrói a cadeia RAG completa.
+    Constrói a cadeia RAG e retorna função wrapper.
     """
     logger.info("Carregando modelo de embeddings...")
     embeddings = HuggingFaceEmbeddings(
@@ -37,19 +42,50 @@ def build_chain():
         allow_dangerous_deserialization=True
     )
 
-    logger.info(
-        "Preparando LLM (%s)...",
-        "local" if settings.use_local_llm else "endpoint"
-    )
+    logger.info("Preparando LLM...")
     llm = rag_llm.get_llm()
 
     logger.info("Montando a cadeia RetrievalQA...")
     chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
-        retriever=db.as_retriever(search_kwargs={'k': 2}),  # Busca os 2 chunks mais relevantes
+        retriever=db.as_retriever(search_kwargs={'k': 5}),  # pega mais docs para comparação
         chain_type_kwargs={"prompt": PROMPT},
-        return_source_documents=False,
+        return_source_documents=True,
     )
 
-    return chain
+    def perguntar_ao_rag(pergunta: str):
+        """
+        Retorna a resposta do RAG usando filtro de similaridade real.
+        """
+        # Busca top-k documentos
+        docs = db.similarity_search(pergunta, k=5)
+
+        if not docs:
+            return "Desculpe, não possuo a informação na minha base."
+
+        # Calcula embedding da pergunta
+        pergunta_embedding = embeddings.embed_query(pergunta)
+
+        # Calcula embeddings dos documentos
+        doc_embeddings = np.array([embeddings.embed_query(doc.page_content) for doc in docs])
+
+        # Calcula cosine similarity
+        sims = cosine_similarity([pergunta_embedding], doc_embeddings)[0]
+
+        # Seleciona documentos acima do limiar
+        relevant_docs = [doc for doc, sim in zip(docs, sims) if sim >= SIMILARITY_THRESHOLD]
+
+        if not relevant_docs:
+            return "Desculpe, não possuo a informação na minha base."
+
+        # Monta o contexto concatenando os docs relevantes
+        context = "\n\n".join([doc.page_content for doc in relevant_docs])
+
+        # Gera prompt final
+        final_prompt = PROMPT.format(context=context, question=pergunta)
+
+        # Chama o LLM
+        return llm.invoke(final_prompt)
+
+    return chain, perguntar_ao_rag
