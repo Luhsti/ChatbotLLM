@@ -10,3 +10,4 @@ torch>=2.2.0
 faiss-cpu==1.8.0.post1
 sentence-transformers
 accelerate
+protobuf>=3.20.3

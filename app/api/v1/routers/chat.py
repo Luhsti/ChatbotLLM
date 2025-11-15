@@ -8,7 +8,7 @@ router = APIRouter()
 
 # Constrói a cadeia e a função wrapper
 
-qa_chain, perguntar_ao_rag = build_chain()
+perguntar_ao_rag = build_chain()
 
 @router.post("/perguntar", response_model=Resposta)
 def perguntar(pergunta: Pergunta):

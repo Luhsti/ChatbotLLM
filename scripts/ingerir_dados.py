@@ -35,8 +35,11 @@ def main():
     logging.info("Total de %d documentos carregados.", len(documents))
 
     # Carrega o modelo de embeddings
-    logging.info("Carregando modelo de embeddings (all-MiniLM-L6-v2)...")
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+    logging.info("Carregando modelo de embeddings (intfloat/e5-base-v2)...")
+    embeddings = HuggingFaceEmbeddings(
+        model_name="intfloat/e5-base-v2",
+        model_kwargs={"device": "cpu"}
+    )
 
     # Cria o banco de dados vetorial e o salva localmente
     logging.info("Criando e salvando o índice FAISS em %s...", VECTOR_DB_PATH)
