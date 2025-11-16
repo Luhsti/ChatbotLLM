@@ -1,1 +1,27 @@
-[INFO] 2025-11-15 13:51:18,467 - app.services.rag - Carregando modelo de embeddings...
+[INFO] 2025-11-15 15:24:48,016 - app.services.rag - Carregando modelo de embeddings...
+[INFO] 2025-11-15 15:24:50,001 - app.services.rag - Carregando FAISS em: C:\Users\Lucas\Documents\chatbot_llm\ChatbotLLM\vectorstore\db_faiss
+[INFO] 2025-11-15 15:24:50,022 - app.services.rag - FAISS carregado com sucesso.
+[INFO] 2025-11-15 15:25:14,464 - app.services.rag - 📥 Pergunta: Como criar graficos em linguagem simples
+[INFO] 2025-11-15 15:25:15,797 - app.services.rag - 📚 Contexto selecionado: Criar graficos em linguagem simples envolve pensar no publico alvo, no contexto da informação e nas formas e cores utilizadas nos gráficos
+[INFO] 2025-11-15 15:25:22,699 - app.services.rag - ⏱️ Tempo total: 6.90s
+[INFO] 2025-11-15 15:25:22,699 - app.services.rag - 💬 Resposta final: Como criar gráficos envolve pensar no publico alvo, no contexto da informaço e nas formas e cores utilizadas nos gráficos.
+[INFO] 2025-11-15 15:26:09,480 - app.services.rag - 📥 Pergunta: Criar graficos
+[INFO] 2025-11-15 15:26:09,601 - app.services.rag - 📚 Contexto selecionado: Criar graficos em linguagem simples envolve pensar no publico alvo, no contexto da informação e nas formas e cores utilizadas nos gráficos
+[INFO] 2025-11-15 15:26:18,318 - app.services.rag - ⏱️ Tempo total: 8.72s
+[INFO] 2025-11-15 15:26:18,318 - app.services.rag - 💬 Resposta final: Isso é o que acontece a criar gráficos em linguagem simples envolve pensar no publico alvo, no contexto da informaço e nas formas e cores utilizadas nos gráficos.
+[INFO] 2025-11-15 15:26:30,541 - app.services.rag - 📥 Pergunta: fazer bolo
+[INFO] 2025-11-15 15:26:36,597 - app.services.rag - 📥 Pergunta: fazer doce
+[INFO] 2025-11-15 15:26:39,831 - app.services.rag - 📥 Pergunta: docinho
+[INFO] 2025-11-15 15:26:44,292 - app.services.rag - 📥 Pergunta: fazer docinho
+[INFO] 2025-11-15 15:26:48,528 - app.services.rag - 📥 Pergunta: fazer simples
+[INFO] 2025-11-15 15:26:48,628 - app.services.rag - 📚 Contexto selecionado: Criar graficos em linguagem simples envolve pensar no publico alvo, no contexto da informação e nas formas e cores utilizadas nos gráficos
+[INFO] 2025-11-15 15:26:55,834 - app.services.rag - ⏱️ Tempo total: 7.21s
+[INFO] 2025-11-15 15:26:55,834 - app.services.rag - 💬 Resposta final: Como é que criar gráficos simples envolve pensar no publico alvo, no contexto da informaço e nas formas e cores utilizadas nos gráficos.
+[INFO] 2025-11-15 15:39:04,098 - app.services.rag - 📥 Pergunta: graficos
+[INFO] 2025-11-15 15:39:04,201 - app.services.rag - 📚 Contexto selecionado: Criar graficos em linguagem simples envolve pensar no publico alvo, no contexto da informação e nas formas e cores utilizadas nos gráficos
+[INFO] 2025-11-15 15:39:13,831 - app.services.rag - ⏱️ Tempo total: 9.63s
+[INFO] 2025-11-15 15:39:13,832 - app.services.rag - 💬 Resposta final: Isto é simples e objetivo. Se a informaço no acontece no contexto, diz: "Desculpe, no encontrei a informaço necessária nos meus documentos.".
+[INFO] 2025-11-15 15:47:48,185 - app.services.rag - 📥 Pergunta: Preciso de dicas de como criar graficos em linguagem simples
+[INFO] 2025-11-15 15:47:48,315 - app.services.rag - 📚 Contexto selecionado: Criar graficos em linguagem simples envolve pensar no publico alvo, no contexto da informação e nas formas e cores utilizadas nos gráficos
+[INFO] 2025-11-15 15:47:52,736 - app.services.rag - ⏱️ Tempo total: 4.42s
+[INFO] 2025-11-15 15:47:52,737 - app.services.rag - 💬 Resposta final: Isto é preciso de dicos de como criar gráficos em linguagem simples.
